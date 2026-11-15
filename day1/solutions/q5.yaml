@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: deploy-template
+  namespace: argo
+spec:
+  entrypoint: deploy
+  arguments:
+    parameters:
+      - name: app-name
+      - name: target-namespace
+      - name: replicas
+      - name: image
+  templates:
+    - name: deploy
+      container:
+        image: bitnami/kubectl:latest
+        command: [kubectl]
+        args:
+          - create
+          - deployment
+          - "{{workflow.parameters.app-name}}"
+          - "--image={{workflow.parameters.image}}"
+          - "--replicas={{workflow.parameters.replicas}}"
+          - "-n"
+          - "{{workflow.parameters.target-namespace}}"
+# argo submit --from workflowtemplate/deploy-template -n argo -p app-name=portal -p target-namespace=self-service -p replicas=3 -p image=nginx:1.27 --watch

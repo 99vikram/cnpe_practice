@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: release-pipeline-
+  namespace: argo
+spec:
+  entrypoint: release-dag
+  templates:
+    - name: release-dag
+      dag:
+        tasks:
+          - name: lint
+            template: run-task
+            arguments: { parameters: [{ name: task-name, value: lint }] }
+          - name: unit-test
+            template: run-task
+            dependencies: [lint]
+            arguments: { parameters: [{ name: task-name, value: unit-test }] }
+          - name: security-scan
+            template: run-task
+            dependencies: [lint]
+            arguments: { parameters: [{ name: task-name, value: security-scan }] }
+          - name: publish
+            template: run-task
+            dependencies: [unit-test, security-scan]
+            arguments: { parameters: [{ name: task-name, value: publish }] }
+    - name: run-task
+      inputs:
+        parameters: [{ name: task-name }]
+      container:
+        image: alpine:3.20
+        command: [sh, -c]
+        args: ["echo '{{inputs.parameters.task-name}} completed'"]
