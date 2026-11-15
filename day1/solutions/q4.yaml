@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: ci-pipeline-
+  namespace: argo
+spec:
+  entrypoint: ci-steps
+  onExit: report-step
+  templates:
+    - name: ci-steps
+      steps:
+        - - { name: compile, template: compile-step }
+        - - { name: package, template: package-step }
+    - name: compile-step
+      container:
+        image: alpine:3.20
+        command: [sh, -c]
+        args: ["echo 'Compiling source...' && sleep 2 && echo 'Compile complete'"]
+    - name: package-step
+      container:
+        image: alpine:3.20
+        command: [sh, -c]
+        args: ["echo 'Packaging artifact...' && sleep 2 && echo 'Package complete'"]
+    - name: report-step
+      container:
+        image: alpine:3.20
+        command: [sh, -c]
+        args: ["echo 'Publishing pipeline status report...'"]
