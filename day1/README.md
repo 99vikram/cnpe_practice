@@ -4,19 +4,20 @@ In the killercoda box:
     git clone https://github.com/99vikram/cnpe_practice.git
     cd cnpe_practice/day1 && bash 00-install-argo.sh && source ~/.bashrc
 
-Three tabs only: box, notes PDF (p.7, p.16-17), questions.md. Timer visible. Phone elsewhere.
+Three tabs only: box, questions.md, this README. Timer visible. Phone elsewhere.
+Every rep: when the timer rings, STOP, diff against the reference, write differences on paper.
 
-| Min     | Block                | Do                                                                                   |
-|---------|----------------------|--------------------------------------------------------------------------------------|
-| 0-5     | install              | script above; `argo version` works                                                   |
-| 5-30    | REP 1 copy           | notes p.7 OPEN. `vim dag.yaml`, type the DAG (don't cat 01-dag.yaml). `argo submit dag.yaml -n argo --watch`. `argo get @latest`, `argo logs @latest`. Remove deploy's dependencies, resubmit, see it run early, put it back. Then `cp 02-ci-workflow.yaml ci-workflow.yaml; argo submit ci-workflow.yaml -n argo --watch` |
-| 30-35   | break                | stand, water, no screen                                                              |
-| 35-60   | REP 2 Q4             | notes CLOSED. Read Q4 in questions.md. Timer 8. `cp 02-ci-workflow.yaml q4.yaml`, edit, submit. Timer rings -> stop, `diff q4.yaml solutions/q4.yaml`, write differences on paper |
-| 60-65   | break                |                                                                                      |
-| 65-90   | REP 3 Q5             | notes CLOSED. Timer 8. `vim deploy-template.yaml`, `k apply -f`, `argo submit --from workflowtemplate/deploy-template -n argo -p ... --watch`, `k get deploy portal -n self-service`. Compare with solutions/q5.yaml |
-| 90-95   | break                |                                                                                      |
-| 95-115  | speed round          | `k delete ns self-service; k create ns self-service; k create rolebinding wf-deploy --clusterrole=edit --serviceaccount=argo:default -n self-service`. Q4b timer 6, Q5b timer 8, from blank. Write both times |
-| 115-120 | close                | paper: forget-list, times, one thing to redo tomorrow. Send me those 3 lines         |
+| Min     | Block            | Do                                                                                          |
+|---------|------------------|---------------------------------------------------------------------------------------------|
+| 0-5     | install          | script above; `argo version` works                                                          |
+| 5-30    | REP 1 copy       | `cat 01-dag.yaml`, read once. `vim dag.yaml` and TYPE it (don't cp). `argo submit dag.yaml -n argo --watch`. If error: read the message, it names the line. `argo get @latest -n argo`. Then `cat solutions/q5.yaml`, type it into `deploy-template.yaml`, `k apply -f deploy-template.yaml`, run it with the `argo submit --from ...` line at the bottom of that file, `k get deploy -n self-service` |
+| 30-35   | break            | stand, water, no screen                                                                     |
+| 35-55   | REP 2 Q4         | Timer 8. Read Q4 in questions.md. `cp 02-ci-workflow.yaml q4.yaml`, edit, `argo submit q4.yaml -n argo --watch`. `diff q4.yaml solutions/q4.yaml` |
+| 55-60   | break            |                                                                                             |
+| 60-80   | REP 3 Q5         | Clean first: `rm deploy-template.yaml; k delete wftmpl deploy-template -n argo; k delete deploy portal -n self-service`. Timer 8. Read Q5. Write `deploy-template.yaml` from blank, apply, submit with `-p` params, `k get deploy portal -n self-service`. `diff deploy-template.yaml solutions/q5.yaml` |
+| 80-85   | break            |                                                                                             |
+| 85-115  | speed round      | Q4b timer 6 (cp 02-ci-workflow.yaml again). Q5b timer 8 (DAG from blank, diff solutions/q5b.yaml). Write both times |
+| 115-120 | close            | paper: forget-list, times, one thing to redo tomorrow. Send me those 3 lines                |
 
-Rules: breaks are mandatory; stop at 120 even if unfinished; if stuck >2 min in rep 2/3,
-peek at the solution for ONE line, write it on the forget-list, continue.
+Rules: breaks mandatory; stop at 120 even if unfinished; stuck >2 min in rep 2/3 -> peek at ONE
+line of the solution, write it on the forget-list, continue. Verify = `k get wf -n argo` (Succeeded).
