@@ -1,0 +1,33 @@
+# REP 1: type this yourself from the notes (page 7). This file is only for comparing afterwards.
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: dag-demo-
+  namespace: argo
+spec:
+  entrypoint: pipeline
+  templates:
+  - name: pipeline
+    dag:
+      tasks:
+      - name: build
+        template: run-step
+        arguments: {parameters: [{name: message, value: Building}]}
+      - name: test-unit
+        template: run-step
+        dependencies: [build]
+        arguments: {parameters: [{name: message, value: Unit tests}]}
+      - name: test-int
+        template: run-step
+        dependencies: [build]
+        arguments: {parameters: [{name: message, value: Integration tests}]}
+      - name: deploy
+        template: run-step
+        dependencies: [test-unit, test-int]
+        arguments: {parameters: [{name: message, value: Deploying}]}
+  - name: run-step
+    inputs: {parameters: [{name: message}]}
+    container:
+      image: alpine:3.18
+      command: [echo]
+      args: ["{{inputs.parameters.message}}"]
