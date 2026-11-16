@@ -1,0 +1,54 @@
+# "Already exists" in the exam: pipeline app-pipeline with clone + build, and the workspace PVC.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: {name: pipeline-workspace-pvc, namespace: ci-pipelines}
+spec: {accessModes: [ReadWriteOnce], resources: {requests: {storage: 1Gi}}}
+---
+apiVersion: tekton.dev/v1
+kind: Task
+metadata: {name: clone, namespace: ci-pipelines}
+spec:
+  workspaces: [{name: source}]
+  results: [{name: target-env}]
+  steps:
+  - name: clone
+    image: alpine:3.20
+    script: |
+      echo "cloning..."
+      cat > $(workspaces.source.path)/deploy.yaml <<'Y'
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata: {name: app}
+      spec:
+        replicas: 1
+        selector: {matchLabels: {app: app}}
+        template:
+          metadata: {labels: {app: app}}
+          spec: {containers: [{name: app, image: nginx:1.27}]}
+      Y
+      echo -n staging > $(results.target-env.path)
+---
+apiVersion: tekton.dev/v1
+kind: Task
+metadata: {name: build, namespace: ci-pipelines}
+spec:
+  workspaces: [{name: source}]
+  steps:
+  - name: build
+    image: alpine:3.20
+    script: |
+      echo "building from $(workspaces.source.path)"; ls $(workspaces.source.path)
+---
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata: {name: app-pipeline, namespace: ci-pipelines}
+spec:
+  workspaces: [{name: shared-workspace}]
+  tasks:
+  - name: clone
+    taskRef: {name: clone}
+    workspaces: [{name: source, workspace: shared-workspace}]
+  - name: build
+    taskRef: {name: build}
+    runAfter: [clone]
+    workspaces: [{name: source, workspace: shared-workspace}]

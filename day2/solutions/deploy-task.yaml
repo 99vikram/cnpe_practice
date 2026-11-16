@@ -1,0 +1,16 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata:
+  name: deploy
+  namespace: ci-pipelines
+spec:
+  params:
+    - { name: namespace, type: string }
+  workspaces:
+    - { name: source }
+  steps:
+    - name: deploy
+      image: bitnami/kubectl:latest
+      script: |
+        #!/bin/sh
+        kubectl apply -f $(workspaces.source.path)/deploy.yaml -n $(params.namespace)

@@ -1,0 +1,16 @@
+# the entry to append under spec.tasks of app-pipeline
+    - name: deploy
+      taskRef:
+        name: deploy
+      runAfter:
+        - build
+      when:
+        - input: "$(tasks.clone.results.target-env)"
+          operator: in
+          values: ["staging"]
+      params:
+        - name: namespace
+          value: "$(tasks.clone.results.target-env)"
+      workspaces:
+        - name: source
+          workspace: shared-workspace

@@ -1,0 +1,21 @@
+# the entry to append under spec.tasks of app-pipeline (k edit pipeline app-pipeline -n ci-pipelines)
+    - name: deploy
+      taskRef:
+        name: deploy
+      runAfter:
+        - clone
+        - build
+      params:
+        - { name: namespace, value: staging }
+      workspaces:
+        - { name: source, workspace: shared-workspace }
+# run:
+# tkn pipeline start app-pipeline -n ci-pipelines --workspace name=shared-workspace,claimName=pipeline-workspace-pvc --showlog
+# PipelineRun YAML alternative:
+# apiVersion: tekton.dev/v1
+# kind: PipelineRun
+# metadata: {generateName: app-pipeline-run-, namespace: ci-pipelines}
+# spec:
+#   pipelineRef: {name: app-pipeline}
+#   workspaces: [{name: shared-workspace, persistentVolumeClaim: {claimName: pipeline-workspace-pvc}}]
+# kubectl create -f pipelinerun.yaml

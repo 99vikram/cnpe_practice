@@ -1,0 +1,10 @@
+apiVersion: tekton.dev/v1
+kind: Task
+metadata: {name: scan, namespace: ci-pipelines}
+spec:
+  params: [{name: image, type: string, default: nginx:1.27}]
+  steps:
+  - name: trivy
+    image: aquasec/trivy:latest
+    args: [image, --exit-code, "1", --severity, "HIGH,CRITICAL", "$(params.image)"]
+# pipeline entry: - {name: scan, taskRef: {name: scan}, runAfter: [build]}  and deploy runAfter: [scan]
