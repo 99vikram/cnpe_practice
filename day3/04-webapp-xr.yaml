@@ -1,0 +1,10 @@
+# "Already exists": /root/webapp-xr.yaml
+apiVersion: platform.example.com/v1
+kind: WebApp
+metadata:
+  name: test-app
+  namespace: crossplane-apps
+spec:
+  image: nginx:1.27
+  replicas: 2
+  targetNamespace: crossplane-apps

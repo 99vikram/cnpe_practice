@@ -1,0 +1,31 @@
+# Q15a: (1) new entry under resources: (same indent as "- name: service")
+      - name: config
+        base:
+          apiVersion: kubernetes.m.crossplane.io/v1alpha1
+          kind: Object
+          spec:
+            providerConfigRef:
+              kind: ClusterProviderConfig
+              name: default
+            forProvider:
+              manifest:
+                apiVersion: v1
+                kind: ConfigMap
+                metadata:
+                  name: webapp-config
+                  namespace: default
+                data:
+                  image: placeholder
+        patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.targetNamespace
+          toFieldPath: spec.forProvider.manifest.metadata.namespace
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.image
+          toFieldPath: spec.forProvider.manifest.data.image
+# (2) under the service resource's patches, APPEND:
+        - type: ToCompositeFieldPath
+          fromFieldPath: spec.forProvider.manifest.metadata.name
+          toFieldPath: status.serviceName
+# verify: k get cm webapp-config -n crossplane-apps -o jsonpath='{.data.image}'; echo
+#         k get webapp test-app -n crossplane-apps -o jsonpath='{.status.serviceName}'; echo

@@ -1,0 +1,12 @@
+# Q15b: only the two additions. (1) under the deployment resource's patches, APPEND:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.replicas
+          toFieldPath: spec.forProvider.manifest.spec.replicas
+# (2) in the service resource's base manifest metadata, add labels:
+                metadata:
+                  name: webapp-svc
+                  namespace: default
+                  labels:
+                    managed-by: crossplane
+# verify: k get deploy webapp -n crossplane-apps -o jsonpath='{.spec.replicas}'  -> 2
+#         k get svc -n crossplane-apps -l managed-by=crossplane

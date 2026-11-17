@@ -1,0 +1,28 @@
+# "Already exists" in the exam. The user-facing API: kind WebApp with spec.image / replicas / targetNamespace.
+apiVersion: apiextensions.crossplane.io/v2
+kind: CompositeResourceDefinition
+metadata:
+  name: webapps.platform.example.com
+spec:
+  scope: Namespaced
+  group: platform.example.com
+  names: {kind: WebApp, plural: webapps}
+  versions:
+  - name: v1
+    served: true
+    referenceable: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            required: [image, targetNamespace]
+            properties:
+              image:           {type: string}
+              replicas:        {type: integer, default: 1}
+              targetNamespace: {type: string}
+          status:
+            type: object
+            properties:
+              serviceName: {type: string}
