@@ -1,0 +1,8 @@
+# Should be REJECTED by a correct Workspace CRD (tier not in enum, replicas > 10, version pattern, missing nothing)
+apiVersion: platform.example.com/v1
+kind: Workspace
+metadata: {name: bad-workspace, namespace: platform-apis}
+spec:
+  tier: prod
+  replicas: 11
+  version: "1.x"

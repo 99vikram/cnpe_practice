@@ -1,0 +1,11 @@
+# "Already exists": /root/sample-environment.yaml (mock 2 Q10). Your CRD must accept this.
+apiVersion: platform.example.com/v1
+kind: Environment
+metadata:
+  name: staging-env
+  namespace: platform-apis
+spec:
+  provider: aws
+  region: eu-west-1
+  size: medium
+  autoScale: true

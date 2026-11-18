@@ -1,0 +1,12 @@
+# "Already exists": /root/sample-workspace.yaml (mock 1 Q10). Your CRD must accept this.
+apiVersion: platform.example.com/v1
+kind: Workspace
+metadata:
+  name: dev-workspace
+  namespace: platform-apis
+spec:
+  tier: development
+  replicas: 2
+  version: "1.4"
+  region: us-east-1
+  monitoring: true
