@@ -1,0 +1,101 @@
+# "Already exists" in the exam: /root/webapp-composition.yaml. Patches image already; you extend it.
+apiVersion: apiextensions.crossplane.io/v1
+kind: Composition
+metadata:
+  name: webapp-composition
+spec:
+  compositeTypeRef:
+    apiVersion: platform.example.com/v1
+    kind: WebApp
+  mode: Pipeline
+  pipeline:
+  - step: patch-and-transform
+    functionRef:
+      name: function-patch-and-transform
+    input:
+      apiVersion: pt.fn.crossplane.io/v1beta1
+      kind: Resources
+      resources:
+      - name: deployment
+        base:
+          apiVersion: kubernetes.m.crossplane.io/v1alpha1
+          kind: Object
+          spec:
+            providerConfigRef:
+              kind: ClusterProviderConfig
+              name: default
+            forProvider:
+              manifest:
+                apiVersion: apps/v1
+                kind: Deployment
+                metadata:
+                  name: webapp
+                  namespace: default
+                spec:
+                  replicas: 1
+                  selector:
+                    matchLabels: {app: webapp}
+                  template:
+                    metadata:
+                      labels: {app: webapp}
+                    spec:
+                      containers:
+                      - name: app
+                        image: placeholder
+                        ports: [{containerPort: 80}]
+        patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.targetNamespace
+          toFieldPath: spec.forProvider.manifest.metadata.namespace
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.image
+          toFieldPath: spec.forProvider.manifest.spec.template.spec.containers[0].image
+      - name: service
+        base:
+          apiVersion: kubernetes.m.crossplane.io/v1alpha1
+          kind: Object
+          spec:
+            providerConfigRef:
+              kind: ClusterProviderConfig
+              name: default
+            forProvider:
+              manifest:
+                apiVersion: v1
+                kind: Service
+                metadata:
+                  name: webapp-svc
+                  namespace: default
+                spec:
+                  selector: {app: webapp}
+                  ports: [{port: 80, targetPort: 80}]
+        patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.targetNamespace
+          toFieldPath: spec.forProvider.manifest.metadata.namespace
+        - type: ToCompositeFieldPath
+          fromFieldPath: spec.forProvider.manifest.metadata.name
+          toFieldPath: status.serviceName
+      - name: config
+        base:
+          apiVersion: kubernetes.m.crossplane.io/v1alpha1
+          kind: Object
+          spec:
+            providerConfigRef:
+              kind: ClusterProviderConfig
+              name: default
+            forProvider:
+              manifest:
+                apiVersion: v1
+                kind: ConfigMap
+                metadata:
+                  name: webapp-config
+                  namespace: default
+                data:
+                  image: placeholder
+        patches:
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.targetNamespace
+          toFieldPath: spec.forProvider.manifest.metadata.namespace
+        - type: FromCompositeFieldPath
+          fromFieldPath: spec.image
+          toFieldPath: spec.forProvider.manifest.data.image
