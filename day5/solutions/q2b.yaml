@@ -1,0 +1,28 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: verify-signed-images
+spec:
+  validationFailureAction: Enforce
+  webhookTimeoutSeconds: 30
+  rules:
+    - name: verify-sigstore-keyless
+      match:
+        any:
+        - resources:
+            kinds:
+              - Pod
+            namespaces:
+              - kyverno-secure
+      verifyImages:
+        - imageReferences:
+            - "ghcr.io/kyverno/*"
+          type: SigstoreBundle
+          required: false
+          attestors:
+            - entries:
+                - keyless:
+                    issuer: "https://token.actions.githubusercontent.com"
+                    subject: "https://github.com/kyverno/kyverno/.github/workflows/*"
+                    rekor:
+                      url: https://rekor.sigstore.dev

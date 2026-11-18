@@ -1,0 +1,22 @@
+# "/root/q1-test-pods.yaml": pod-blocked must be rejected, pod-allowed admitted (works for Q1 and Q1b)
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-blocked
+  namespace: gatekeeper-apps
+spec:
+  containers:
+  - name: web
+    image: nginx:latest
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-allowed
+  namespace: gatekeeper-apps
+  labels:
+    team: platform
+spec:
+  containers:
+  - name: web
+    image: nginx:1.27
