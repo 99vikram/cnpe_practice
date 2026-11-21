@@ -1,0 +1,68 @@
+# "Already exists" in the exam: Deployment demo-app + two services (progressive), and checkout-svc (tracing)
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: demo-app, namespace: progressive}
+spec:
+  replicas: 2
+  selector: {matchLabels: {app: demo-app}}
+  template:
+    metadata: {labels: {app: demo-app}}
+    spec:
+      containers:
+      - name: demo
+        image: argoproj/rollouts-demo:blue
+        ports: [{containerPort: 8080}]
+---
+apiVersion: v1
+kind: Service
+metadata: {name: demo-active, namespace: progressive}
+spec: {selector: {app: demo-app}, ports: [{port: 80, targetPort: 8080}]}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: demo-preview, namespace: progressive}
+spec: {selector: {app: demo-app}, ports: [{port: 80, targetPort: 8080}]}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: demo-stable, namespace: progressive}
+spec: {selector: {app: demo-app}, ports: [{port: 80, targetPort: 8080}]}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: demo-canary, namespace: progressive}
+spec: {selector: {app: demo-app}, ports: [{port: 80, targetPort: 8080}]}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: checkout-svc, namespace: tracing}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: checkout-svc}}
+  template:
+    metadata: {labels: {app: checkout-svc}}
+    spec:
+      containers:
+      - name: checkout
+        image: nginx:1.27
+        env:
+        - {name: OTEL_EXPORTER_OTLP_ENDPOINT, value: "http://jaeger-collector.tracing:4317"}
+        - {name: OTEL_TRACES_EXPORTER, value: "otlp"}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: notification-svc, namespace: tracing}
+spec:
+  replicas: 1
+  selector: {matchLabels: {app: notification-svc}}
+  template:
+    metadata: {labels: {app: notification-svc}}
+    spec:
+      containers:
+      - name: notification
+        image: nginx:1.27
+---
+apiVersion: v1
+kind: Service
+metadata: {name: jaeger-collector, namespace: tracing}
+spec: {selector: {app: jaeger}, ports: [{name: grpc, port: 4317}, {name: http, port: 4318}]}

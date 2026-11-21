@@ -1,0 +1,11 @@
+# "/root/demo-rollout.yaml" as the exam gives it: replicas + selector done, you complete the rest.
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: demo-rollout
+  namespace: progressive
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: demo-app
