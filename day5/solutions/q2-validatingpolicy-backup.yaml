@@ -1,0 +1,22 @@
+# BACKUP ONLY: if the exam cluster runs Kyverno 1.20+ (classic ClusterPolicy no longer executes), the same rule as a
+# CEL ValidatingPolicy. Check version: k get deploy -n kyverno -o jsonpath='{.items[0].spec.template.spec.containers[0].image}'
+apiVersion: policies.kyverno.io/v1
+kind: ValidatingPolicy
+metadata:
+  name: require-run-as-nonroot
+spec:
+  validationActions: [Deny]
+  matchConstraints:
+    namespaceSelector:
+      matchLabels:
+        kubernetes.io/metadata.name: kyverno-secure
+    resourceRules:
+    - apiGroups: [""]
+      apiVersions: ["v1"]
+      operations: ["CREATE", "UPDATE"]
+      resources: ["pods"]
+  validations:
+  - expression: >-
+      (has(object.spec.securityContext) && has(object.spec.securityContext.runAsNonRoot) && object.spec.securityContext.runAsNonRoot == true)
+      || object.spec.containers.all(c, has(c.securityContext) && has(c.securityContext.runAsNonRoot) && c.securityContext.runAsNonRoot == true)
+    message: "Containers must run as a non-root user. Set runAsNonRoot to true."
